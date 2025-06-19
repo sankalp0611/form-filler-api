@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+uploads/
+outputs/
+*.pdf
+*.html
+venv/
+temp_filled.html
+
