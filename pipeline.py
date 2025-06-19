@@ -7,17 +7,26 @@ from bs4 import BeautifulSoup
 from pdf2image import convert_from_path
 import pytesseract
 import pdfkit
+import platform
+from dotenv import load_dotenv
+
 from langchain_groq import ChatGroq
 from langchain.prompts import PromptTemplate
 from langchain_community.vectorstores import FAISS
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from dotenv import load_dotenv
 
 load_dotenv()
 
+# === ✅ Poppler and wkhtmltopdf paths ===
 poppler_path = r"C:\\poppler\\poppler-24.08.0\\Library\\bin"
-wkhtmltopdf_path = r"C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"
+
+if platform.system() == 'Windows':
+    wkhtmltopdf_path = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
+else:
+    wkhtmltopdf_path = "/usr/bin/wkhtmltopdf"
+
 pdfkit_config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
+
 
 class PdfOcrExtractorNode:
     def __init__(self, poppler_path):
@@ -27,6 +36,7 @@ class PdfOcrExtractorNode:
         images = convert_from_path(pdf_path, poppler_path=self.poppler_path)
         text = "\n".join(pytesseract.image_to_string(img) for img in images).strip()
         return text if text else "[OCR Failed: No text extracted]"
+
 
 class HtmlFormExtractorNode:
     def run(self, html_path):
@@ -38,6 +48,7 @@ class HtmlFormExtractorNode:
             for tag in inputs
         ]
 
+
 class GroqQAConfidenceNode:
     def __init__(self):
         self.llm = ChatGroq(temperature=0.2, model_name="llama3-8b-8192")
@@ -46,7 +57,7 @@ class GroqQAConfidenceNode:
             template="""
 You are an intelligent document assistant.
 Based on the extracted document text below, answer the question as accurately as possible.
-If unsure, say \"Not found\".
+If unsure, say "Not found".
 
 Document Text:
 {doc_text}
@@ -82,9 +93,14 @@ Just return the number.
         results = {}
         for q in questions:
             answer = self.qa_chain.invoke({"doc_text": doc_text, "question": q}).content.strip()
-            confidence = self.confidence_chain.invoke({"doc_text": doc_text, "question": q, "answer": answer}).content.strip()
+            confidence = self.confidence_chain.invoke({
+                "doc_text": doc_text,
+                "question": q,
+                "answer": answer
+            }).content.strip()
             results[q] = {"answer": answer, "confidence": confidence}
         return results
+
 
 class GroqTableExtractorNode:
     def __init__(self):
@@ -105,6 +121,7 @@ Structured Table:
             return json.loads(response) if "No table" not in response else []
         except Exception:
             return []
+
 
 class PdfEmbeddingSearchNode:
     def __init__(self):
@@ -138,6 +155,7 @@ Return your answer and a confidence score from 1 to 5.
         context = "\n".join([doc.page_content for doc in docs])
         return self.rerank_chain.invoke({"question": question, "context": context}).content.strip()
 
+
 class PdfOutputWriterNode:
     def __init__(self, pdfkit_config):
         self.pdfkit_config = pdfkit_config
@@ -166,6 +184,7 @@ class PdfOutputWriterNode:
             f.write(html)
         pdfkit.from_file(output_html_path, output_pdf_path, configuration=self.pdfkit_config)
 
+
 class AgenticDocumentProcessor:
     def __init__(self, pdf_path, html_path, output_html_path, output_pdf_path):
         self.pdf_path = pdf_path
@@ -190,7 +209,7 @@ class AgenticDocumentProcessor:
         for q, result in answers_map.items():
             if result['confidence'].isdigit() and int(result['confidence']) <= 2:
                 fallback = self.embedding_node.answer_question(q)
-                result['answer'] += f" [fallback: {fallback}]"
+                result['answer'] = f"{result['answer']} [fallback: {fallback}]"
 
         tables = self.table_node.run(doc_text)
 
@@ -202,6 +221,7 @@ class AgenticDocumentProcessor:
             "tables": tables,
             "output_pdf_path": self.output_pdf_path
         }
+
 
 def run_pipeline_on_files(pdf_path, html_path, output_html_path, output_pdf_path):
     processor = AgenticDocumentProcessor(pdf_path, html_path, output_html_path, output_pdf_path)
