@@ -10,6 +10,8 @@ python-dotenv
 pdfplumber
 langchain
 langchain-groq
+langchain-community
+
 
 # Embeddings + Transformers
 InstructorEmbedding==1.0.1
