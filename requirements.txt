@@ -9,7 +9,7 @@ pdfkit
 python-dotenv
 pdfplumber
 langchain
-langchain_groq
+langchain-groq
 
 # Embeddings + Transformers
 InstructorEmbedding==1.0.1
