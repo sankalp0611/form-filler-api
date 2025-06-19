@@ -7,6 +7,9 @@ pdf2image
 PyMuPDF
 pdfkit
 python-dotenv
+pdfplumber
+langchain
+langchain_groq
 
 # Embeddings + Transformers
 InstructorEmbedding==1.0.1
