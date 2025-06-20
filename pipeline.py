@@ -8,6 +8,7 @@ from pdf2image import convert_from_path
 import pytesseract
 import pdfkit
 import platform
+import shutil
 from dotenv import load_dotenv
 
 from langchain_groq import ChatGroq
@@ -20,10 +21,14 @@ load_dotenv()
 # === ✅ Poppler and wkhtmltopdf paths ===
 poppler_path = r"C:\\poppler\\poppler-24.08.0\\Library\\bin"
 
+# Dynamically detect wkhtmltopdf
 if platform.system() == 'Windows':
     wkhtmltopdf_path = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
 else:
-    wkhtmltopdf_path = "/usr/bin/wkhtmltopdf"
+    wkhtmltopdf_path = shutil.which("wkhtmltopdf")  # searches system PATH
+
+if wkhtmltopdf_path is None:
+    raise EnvironmentError("wkhtmltopdf executable not found. Make sure it’s installed and accessible in PATH.")
 
 pdfkit_config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
 
