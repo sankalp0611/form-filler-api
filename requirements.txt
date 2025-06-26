@@ -25,10 +25,10 @@ transformers==4.32.0  # SINGLE DECLARATION
 huggingface-hub>=0.30.0,<1.0
 tqdm
 scikit-learn
-numpy>=1.21  # PREVENT LEGACY VERSION CONFLICT
+numpy>=2.3.1  # PREVENT LEGACY VERSION CONFLICT
 
 # Torch (CPU-only)
-torch==2.0.1  # SINGLE DECLARATION
+torch==2.5.0# SINGLE DECLARATION
 
 # FAISS (CPU)
 faiss-cpu==1.7.4  # PIN COMPATIBLE VERSION
