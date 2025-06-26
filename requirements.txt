@@ -1,23 +1,23 @@
-# Core API + Server
+# === Core API + Server ===
 fastapi
 uvicorn
 python-multipart
+python-dotenv
 
-# HTML + PDF Parsing
+# === HTML + PDF Parsing ===
 beautifulsoup4
 pytesseract
 pdf2image
 PyMuPDF
 pdfkit
 pdfplumber
-python-dotenv
 
-# LangChain + Groq
+# === LangChain + Groq ===
 langchain
 langchain-groq
 langchain-community
 
-# Embeddings + Transformers (critical)
+# === Embeddings + Transformers ===
 sentence-transformers==2.4.0
 InstructorEmbedding==1.0.1
 transformers==4.32.0
@@ -26,8 +26,8 @@ tqdm
 scikit-learn
 numpy
 
-# CPU-only Torch (mandatory for sentence-transformers)
+# === Torch (CPU only, compatible) ===
 torch==2.5.1
 
-# FAISS backend (Render = CPU)
+# === FAISS backend (Render = CPU only) ===
 faiss-cpu
