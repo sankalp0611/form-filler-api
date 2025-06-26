@@ -27,7 +27,7 @@ scikit-learn
 numpy
 
 # CPU-only Torch (mandatory for sentence-transformers)
-torch==2.0.1
+torch==2.5.1
 
 # FAISS backend (Render = CPU)
 faiss-cpu
