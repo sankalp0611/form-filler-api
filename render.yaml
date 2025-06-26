@@ -5,8 +5,8 @@ services:
     buildCommand: |
       apt-get update && apt-get install -y wkhtmltopdf
       pip install --upgrade pip
-      pip install -r requirements.txt
+      pip install --only-binary=:all: -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port 10000
     envVars:
       - key: PYTHON_VERSION
-        value: 3.10.13
+        value: 3.10.13  # ✅ Or 3.9.19 if still needed
