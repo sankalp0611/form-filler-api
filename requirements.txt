@@ -18,7 +18,9 @@ langchain-groq
 langchain-community
 
 # Embeddings + Transformers (critical)
-sentence-transformers==2.2.2
+sentence-transformers==2.4.0
+transformers==4.32.0
+torch==2.0.1
 InstructorEmbedding==1.0.1
 transformers
 huggingface-hub>=0.30.0,<1.0
