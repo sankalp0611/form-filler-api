@@ -1,9 +1,9 @@
-# Core API + Server
+# === Core API + Server ===
 fastapi
 uvicorn
 python-multipart
 
-# HTML + PDF Parsing
+# === HTML + PDF Parsing ===
 beautifulsoup4
 pytesseract
 pdf2image
@@ -12,20 +12,21 @@ pdfkit
 pdfplumber
 python-dotenv
 
-# LangChain + Groq
+# === LangChain + Groq ===
 langchain
 langchain-groq
 langchain-community
 
-# Embeddings + Transformers
+# === Embeddings + Transformers ===
 sentence-transformers==2.2.2
-transformers==4.31.0
+InstructorEmbedding==1.0.1
+transformers==4.32.0
 tokenizers==0.13.3
 huggingface-hub>=0.30.0,<1.0
 tqdm
 scikit-learn
 numpy
-torch==2.0.1
+torch==2.2.2  # ✅ DO NOT include multiple torch versions
 
-# FAISS
+# === Vector Search ===
 faiss-cpu==1.7.4
