@@ -1,4 +1,3 @@
-# CORRECTED VERSION
 # Core API + Server
 fastapi
 uvicorn
@@ -28,7 +27,7 @@ scikit-learn
 numpy>=2.3.1  # PREVENT LEGACY VERSION CONFLICT
 
 # Torch (CPU-only)
-torch==2.5.0# SINGLE DECLARATION
+torch==2.5.0  # SINGLE DECLARATION
 
 # FAISS (CPU)
 faiss-cpu==1.7.4  # PIN COMPATIBLE VERSION
