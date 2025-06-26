@@ -26,7 +26,5 @@ huggingface-hub>=0.30.0,<1.0
 tqdm
 scikit-learn
 numpy
-torch==2.2.2  # ✅ DO NOT include multiple torch versions
-
-# === Vector Search ===
-faiss-cpu==1.7.4
+torch==2.2.2             # ✅ Fully supported on Python 3.11
+faiss-cpu==1.7.4         # ✅ Has prebuilt wheels for 3.11
