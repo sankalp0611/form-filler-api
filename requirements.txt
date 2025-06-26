@@ -1,3 +1,4 @@
+# CORRECTED VERSION
 # Core API + Server
 fastapi
 uvicorn
@@ -17,19 +18,17 @@ langchain
 langchain-groq
 langchain-community
 
-# Embeddings + Transformers (critical)
+# Embeddings + Transformers
 sentence-transformers==2.4.0
-transformers==4.32.0
-torch==2.0.1
 InstructorEmbedding==1.0.1
-transformers
+transformers==4.32.0  # SINGLE DECLARATION
 huggingface-hub>=0.30.0,<1.0
 tqdm
 scikit-learn
-numpy
+numpy>=1.21  # PREVENT LEGACY VERSION CONFLICT
 
-# CPU-only Torch (mandatory for sentence-transformers)
-torch
+# Torch (CPU-only)
+torch==2.0.1  # SINGLE DECLARATION
 
-# FAISS backend (Render = CPU)
-faiss-cpu
+# FAISS (CPU)
+faiss-cpu==1.7.4  # PIN COMPATIBLE VERSION
