@@ -17,17 +17,17 @@ langchain
 langchain-groq
 langchain-community
 
-# Embeddings + Transformers
+# Embeddings + Transformers (critical)
 sentence-transformers==2.4.0
 InstructorEmbedding==1.0.1
-transformers==4.32.0  # SINGLE DECLARATION
+transformers==4.32.0
 huggingface-hub>=0.30.0,<1.0
 tqdm
 scikit-learn
-numpy>=2.3.1  # PREVENT LEGACY VERSION CONFLICT
+numpy
 
-# Torch (CPU-only)
-torch==2.5.0  # SINGLE DECLARATION
+# CPU-only Torch (mandatory for sentence-transformers)
+torch==2.0.1
 
-# FAISS (CPU)
-faiss-cpu==1.7.4  # PIN COMPATIBLE VERSION
+# FAISS backend (Render = CPU)
+faiss-cpu
