@@ -9,4 +9,4 @@ services:
     startCommand: uvicorn main:app --host 0.0.0.0 --port 10000
     envVars:
       - key: PYTHON_VERSION
-        value: 3.12.3  # ✅ Required for PyTorch and faiss-cpu
+        value: 3.11.9  # ✅ Downgraded to match faiss-cpu prebuilt wheel support
