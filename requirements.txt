@@ -1,21 +1,33 @@
-tokenizers==0.15.2         # ✅ Prebuilt wheel available for Python 3.12+
-transformers==4.36.2       # ✅ Compatible with tokenizers 0.15.2
+# === Core NLP / Transformers Stack ===
+tokenizers==0.15.2             # ✅ Prebuilt for Python 3.12+
+transformers==4.36.2           # ✅ Compatible with tokenizers 0.15.2
 sentence-transformers==2.2.2
-torch==2.5.1
-chromadb==0.5.0
-numpy<2.0
+torch>=2.5.1,<2.6              # ✅ Loosened to allow compatibility
+# torchvision removed — re-add only if needed, and match torch
+
+# === Vector Database ===
+chromadb==0.5.0                # ✅ FAISS alternative
+
+# === Math & ML ===
+numpy<2.0                      # ✅ Prevents binary issues with torch
 tqdm
 scikit-learn
+
+# === PDF & HTML Parsing ===
 beautifulsoup4
 pytesseract
 pdf2image
 PyMuPDF
 pdfkit
 pdfplumber
+
+# === Environment & API ===
 python-dotenv
 fastapi
 uvicorn
 python-multipart
+
+# === LangChain Ecosystem ===
 langchain
 langchain-groq
 langchain-community
