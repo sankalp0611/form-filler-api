@@ -1,4 +1,4 @@
-# === ✅ Updated pipeline.py ===
+# === ✅ Updated pipeline.py with ChromaDB ===
 
 import os
 import json
@@ -147,16 +147,16 @@ Return your answer and a confidence score from 1 to 5.
 """
         )
         self.rerank_chain = self.rerank_prompt | self.llm
-        self.faiss_index = None
+        self.vector_store = None
 
-    def build_faiss_index(self, pdf_path, chunk_size=500):
+    def build_vector_index(self, pdf_path, chunk_size=500):
         doc = fitz.open(pdf_path)
         text = "".join(page.get_text() for page in doc)
         chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
-        self.faiss_index = FAISS.from_texts(chunks, self.embedding_model)
+        self.vector_store = Chroma.from_texts(chunks, self.embedding_model, persist_directory="./chroma_db")
 
     def answer_question(self, question, k=3):
-        docs = self.faiss_index.similarity_search(question, k=k)
+        docs = self.vector_store.similarity_search(question, k=k)
         context = "\n".join([doc.page_content for doc in docs])
         return self.rerank_chain.invoke({"question": question, "context": context}).content.strip()
 
@@ -208,7 +208,7 @@ class AgenticDocumentProcessor:
         doc_text = self.ocr_node.run(self.pdf_path)
         questions = self.form_extractor_node.run(self.html_path)
         answers_map = self.qa_node.run(doc_text, questions)
-        self.embedding_node.build_faiss_index(self.pdf_path)
+        self.embedding_node.build_vector_index(self.pdf_path)
 
         # === Phase 5 fallback rerank ===
         for q, result in answers_map.items():
