@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 
 from langchain_groq import ChatGroq
 from langchain.prompts import PromptTemplate
-from langchain_community.vectorstores import FAISS
+from langchain_community.vectorstores import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 
 load_dotenv()
