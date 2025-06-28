@@ -3,7 +3,7 @@ torch==2.7.1
 torchvision==0.22.1
 sentence-transformers==2.4.0
 transformers==4.32.0
-tokenizers==0.13.3
+tokenizers==0.15.2
 huggingface-hub>=0.16.0
 
 # === Vector Store ===
