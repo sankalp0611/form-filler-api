@@ -1,5 +1,3 @@
-# === ✅ Updated pipeline.py with ChromaDB ===
-
 import os
 import json
 import fitz
@@ -9,6 +7,7 @@ import pytesseract
 import pdfkit
 import platform
 import shutil
+import tempfile
 from dotenv import load_dotenv
 
 from langchain_groq import ChatGroq
@@ -18,17 +17,17 @@ from langchain_community.embeddings import HuggingFaceEmbeddings
 
 load_dotenv()
 
-# === ✅ Poppler and wkhtmltopdf paths ===
-poppler_path = r"C:\\poppler\\poppler-24.08.0\\Library\\bin"
-
-# Dynamically detect wkhtmltopdf
+# === ✅ Fix paths for Linux deployment ===
 if platform.system() == 'Windows':
+    poppler_path = r"C:\\poppler\\poppler-24.08.0\\Library\\bin"
     wkhtmltopdf_path = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
 else:
-    wkhtmltopdf_path = shutil.which("wkhtmltopdf")  # searches system PATH
+    # Linux (Render) - use system PATH
+    poppler_path = None
+    wkhtmltopdf_path = shutil.which("wkhtmltopdf")
 
 if wkhtmltopdf_path is None:
-    raise EnvironmentError("wkhtmltopdf executable not found. Make sure it’s installed and accessible in PATH.")
+    raise EnvironmentError("wkhtmltopdf executable not found. Make sure it's installed and accessible in PATH.")
 
 pdfkit_config = pdfkit.configuration(wkhtmltopdf=wkhtmltopdf_path)
 
@@ -38,7 +37,10 @@ class PdfOcrExtractorNode:
         self.poppler_path = poppler_path
 
     def run(self, pdf_path):
-        images = convert_from_path(pdf_path, poppler_path=self.poppler_path)
+        if self.poppler_path:
+            images = convert_from_path(pdf_path, poppler_path=self.poppler_path)
+        else:
+            images = convert_from_path(pdf_path)
         text = "\n".join(pytesseract.image_to_string(img) for img in images).strip()
         return text if text else "[OCR Failed: No text extracted]"
 
@@ -153,7 +155,9 @@ Return your answer and a confidence score from 1 to 5.
         doc = fitz.open(pdf_path)
         text = "".join(page.get_text() for page in doc)
         chunks = [text[i:i+chunk_size] for i in range(0, len(text), chunk_size)]
-        self.vector_store = Chroma.from_texts(chunks, self.embedding_model, persist_directory="./chroma_db")
+        # Use temporary directory for Render
+        temp_dir = tempfile.mkdtemp()
+        self.vector_store = Chroma.from_texts(chunks, self.embedding_model, persist_directory=temp_dir)
 
     def answer_question(self, question, k=3):
         docs = self.vector_store.similarity_search(question, k=k)
