@@ -12,7 +12,11 @@ from pipeline import run_pipeline_on_files
 
 load_dotenv()
 
-app = FastAPI()
+app = FastAPI(
+    title="Auto Form Filler API",
+    description="API for processing PDF documents and filling HTML forms using AI",
+    version="1.0.0"
+)
 
 # CORS setup
 app.add_middleware(
@@ -29,6 +33,24 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 def clean_llm_boilerplate(text: str) -> str:
     pattern = r"^\s*"
     return re.sub(pattern, "", text, flags=re.IGNORECASE).strip()
+
+# ✅ ADD ROOT ROUTE - This fixes the 404 error!
+@app.get("/")
+async def root():
+    return {
+        "message": "Auto Form Filler API is running!",
+        "status": "healthy",
+        "endpoints": {
+            "process": "/process/ (POST)",
+            "docs": "/docs",
+            "health": "/health"
+        }
+    }
+
+# ✅ ADD HEALTH CHECK ENDPOINT
+@app.get("/health")
+async def health_check():
+    return {"status": "healthy", "service": "auto-form-filler"}
 
 @app.post("/process/")
 async def process(
