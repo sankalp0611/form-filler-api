@@ -1,101 +1,98 @@
-#!/usr/bin/env python3
-"""
-Debug script to test all imports and dependencies
-"""
-import sys
+from fastapi import FastAPI, File, UploadFile, Form, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+import os
+import logging
+import uuid
+import tempfile
 import traceback
 
-def test_basic_imports():
-    print("🔍 Testing basic imports...")
-    try:
-        import fastapi
-        print("✅ FastAPI")
-    except Exception as e:
-        print(f"❌ FastAPI: {e}")
-    
-    try:
-        import uvicorn
-        print("✅ Uvicorn")
-    except Exception as e:
-        print(f"❌ Uvicorn: {e}")
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-def test_ml_imports():
-    print("\n🔍 Testing ML/AI imports...")
-    try:
-        from langchain_groq import ChatGroq
-        print("✅ LangChain Groq")
-    except Exception as e:
-        print(f"❌ LangChain Groq: {e}")
-    
-    try:
-        from langchain_huggingface import HuggingFaceEmbeddings
-        print("✅ HuggingFace Embeddings (new)")
-    except Exception as e:
-        print(f"⚠️ HuggingFace Embeddings (new): {e}")
-        try:
-            from langchain_community.embeddings import HuggingFaceEmbeddings
-            print("✅ HuggingFace Embeddings (community)")
-        except Exception as e2:
-            print(f"❌ HuggingFace Embeddings (community): {e2}")
+# Create FastAPI app
+app = FastAPI(title="Document Processing API", version="1.0.0")
 
-def test_pdf_processing():
-    print("\n🔍 Testing PDF processing imports...")
-    try:
-        import fitz
-        print("✅ PyMuPDF (fitz)")
-    except Exception as e:
-        print(f"❌ PyMuPDF: {e}")
-    
-    try:
-        import pdf2image
-        print("✅ pdf2image")
-    except Exception as e:
-        print(f"❌ pdf2image: {e}")
-    
-    try:
-        import pytesseract
-        print("✅ pytesseract")
-    except Exception as e:
-        print(f"❌ pytesseract: {e}")
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
-def test_pipeline_import():
-    print("\n🔍 Testing pipeline import...")
+@app.get("/")
+async def root():
+    return {"message": "Document Processing API is running", "status": "healthy"}
+
+@app.get("/health")
+async def health_check():
+    return {
+        "status": "healthy",
+        "groq_api_key": "present" if os.getenv("GROQ_API_KEY") else "missing"
+    }
+
+@app.get("/test")
+async def test_endpoint():
     try:
-        from pipeline import run_pipeline_on_files
-        print("✅ Pipeline import successful")
-        return True
+        return {
+            "message": "Test successful",
+            "environment": {
+                "groq_api_key": "present" if os.getenv("GROQ_API_KEY") else "missing"
+            }
+        }
     except Exception as e:
-        print(f"❌ Pipeline import failed: {e}")
-        traceback.print_exc()
-        return False
+        logger.error(f"Test endpoint error: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"error": "Test failed", "details": str(e)}
+        )
 
-def test_environment():
-    print("\n🔍 Testing environment...")
-    import os
-    groq_key = os.getenv("GROQ_API_KEY")
-    if groq_key:
-        print(f"✅ GROQ_API_KEY found (length: {len(groq_key)})")
-    else:
-        print("⚠️ GROQ_API_KEY not found")
-
-def main():
-    print("🚀 Auto Form Filler - Dependency Check\n")
+@app.post("/process/")
+async def process_document(
+    file: UploadFile = File(...),
+    prompt: str = Form(...)
+):
+    request_id = str(uuid.uuid4())
+    logger.info(f"Processing request {request_id}")
     
-    test_basic_imports()
-    test_ml_imports()
-    test_pdf_processing()
-    test_environment()
-    
-    pipeline_ok = test_pipeline_import()
-    
-    print(f"\n{'='*50}")
-    if pipeline_ok:
-        print("✅ All critical components loaded successfully!")
-        print("🚀 The application should work correctly.")
-    else:
-        print("❌ Pipeline import failed - check the errors above")
-        print("🔧 The application may have limited functionality.")
-    print(f"{'='*50}")
+    try:
+        # Basic validation
+        if not file.filename:
+            raise HTTPException(status_code=400, detail="No file provided")
+        
+        # Read file content
+        content = await file.read()
+        
+        # Basic response (replace with your actual processing)
+        result = {
+            "success": True,
+            "request_id": request_id,
+            "filename": file.filename,
+            "file_size": len(content),
+            "prompt": prompt,
+            "message": "File processed successfully"
+        }
+        
+        return JSONResponse(content=result)
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error processing file: {e}")
+        logger.error(traceback.format_exc())
+        
+        return JSONResponse(
+            status_code=500,
+            content={
+                "success": False,
+                "error": "Processing failed",
+                "details": str(e)
+            }
+        )
 
 if __name__ == "__main__":
-    main()
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)
