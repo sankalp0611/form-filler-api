@@ -11,20 +11,12 @@ pdfplumber
 langchain
 langchain-groq
 langchain-community
-
-
-# Embeddings + Transformers
-InstructorEmbedding==1.0.1
 sentence-transformers==2.2.2
 transformers
 huggingface-hub>=0.30.0,<1.0
 tqdm
 scikit-learn
 numpy
-
-# Torch (for CPU environments)
 torch
-
-# Optional: Choose one FAISS backend
 faiss-cpu
-# or use faiss-gpu if deploying on GPU-enabled server (Render doesn't support GPU on free tier)
+chromadb
