@@ -2,13 +2,12 @@ services:
   - type: web
     name: form-filler-api
     env: python
-    plan: starter
-    autoDeploy: true
     buildCommand: |
-      apt-get update && apt-get install -y wkhtmltopdf
+      apt-get update && apt-get install -y wkhtmltopdf cmake
       pip install --upgrade pip
-      pip install --only-binary=:all: -r requirements.txt
+      pip install -r requirements.txt
+      pip show sentence-transformers || echo "sentence-transformers not found"
     startCommand: uvicorn main:app --host 0.0.0.0 --port 10000
     envVars:
       - key: PYTHON_VERSION
-        value: 3.12.3
+        value: 3.10
