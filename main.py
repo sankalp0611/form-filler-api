@@ -1,102 +1,101 @@
-# main.py
+#!/usr/bin/env python3
+"""
+Debug script to test all imports and dependencies
+"""
+import sys
+import traceback
 
-from fastapi import FastAPI, File, UploadFile, Form
-from fastapi.responses import JSONResponse, StreamingResponse
-from fastapi.middleware.cors import CORSMiddleware
-import shutil
-import os
-import io
-import re
-from dotenv import load_dotenv
-from pipeline import run_pipeline_on_files
-
-load_dotenv()
-
-app = FastAPI(
-    title="Auto Form Filler API",
-    description="API for processing PDF documents and filling HTML forms using AI",
-    version="1.0.0"
-)
-
-# CORS setup
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-UPLOAD_DIR = "uploads"
-os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-def clean_llm_boilerplate(text: str) -> str:
-    pattern = r"^\s*"
-    return re.sub(pattern, "", text, flags=re.IGNORECASE).strip()
-
-# ✅ ADD ROOT ROUTE - This fixes the 404 error!
-@app.get("/")
-async def root():
-    return {
-        "message": "Auto Form Filler API is running!",
-        "status": "healthy",
-        "endpoints": {
-            "process": "/process/ (POST)",
-            "docs": "/docs",
-            "health": "/health"
-        }
-    }
-
-# ✅ ADD HEALTH CHECK ENDPOINT
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy", "service": "auto-form-filler"}
-
-@app.post("/process/")
-async def process(
-    pdf_file: UploadFile = File(...),
-    html_file: UploadFile = File(...),
-    return_pdf: bool = Form(False)
-):
+def test_basic_imports():
+    print("🔍 Testing basic imports...")
     try:
-        # Save uploaded files
-        pdf_path = os.path.join(UPLOAD_DIR, pdf_file.filename)
-        html_path = os.path.join(UPLOAD_DIR, html_file.filename)
-        output_html_path = os.path.join(UPLOAD_DIR, "output.html")
-        output_pdf_path = os.path.join(UPLOAD_DIR, "filled_output.pdf")
-
-        with open(pdf_path, "wb") as f:
-            shutil.copyfileobj(pdf_file.file, f)
-        with open(html_path, "wb") as f:
-            shutil.copyfileobj(html_file.file, f)
-
-        # Run the agentic pipeline
-        result = run_pipeline_on_files(pdf_path, html_path, output_html_path, output_pdf_path)
-
-        # Clean answers if needed
-        cleaned_answers = {}
-        for key, value in result["answers"].items():
-            if isinstance(value, str):
-                cleaned_answers[key] = clean_llm_boilerplate(value)
-            else:
-                cleaned_answers[key] = value  # already dict with answer and confidence
-
-        # Return result
-        if return_pdf and os.path.exists(output_pdf_path):
-            with open(output_pdf_path, "rb") as f:
-                pdf_bytes = f.read()
-            return StreamingResponse(
-                io.BytesIO(pdf_bytes),
-                media_type="application/pdf",
-                headers={"Content-Disposition": "attachment; filename=filled_form.pdf"}
-            )
-
-        return JSONResponse(content={
-            "status": "success",
-            "answers": cleaned_answers,
-            "tables": result["tables"],
-            "message": "Form filled and processed successfully."
-        })
-
+        import fastapi
+        print("✅ FastAPI")
     except Exception as e:
-        return JSONResponse(status_code=500, content={"status": "error", "message": str(e)})
+        print(f"❌ FastAPI: {e}")
+    
+    try:
+        import uvicorn
+        print("✅ Uvicorn")
+    except Exception as e:
+        print(f"❌ Uvicorn: {e}")
+
+def test_ml_imports():
+    print("\n🔍 Testing ML/AI imports...")
+    try:
+        from langchain_groq import ChatGroq
+        print("✅ LangChain Groq")
+    except Exception as e:
+        print(f"❌ LangChain Groq: {e}")
+    
+    try:
+        from langchain_huggingface import HuggingFaceEmbeddings
+        print("✅ HuggingFace Embeddings (new)")
+    except Exception as e:
+        print(f"⚠️ HuggingFace Embeddings (new): {e}")
+        try:
+            from langchain_community.embeddings import HuggingFaceEmbeddings
+            print("✅ HuggingFace Embeddings (community)")
+        except Exception as e2:
+            print(f"❌ HuggingFace Embeddings (community): {e2}")
+
+def test_pdf_processing():
+    print("\n🔍 Testing PDF processing imports...")
+    try:
+        import fitz
+        print("✅ PyMuPDF (fitz)")
+    except Exception as e:
+        print(f"❌ PyMuPDF: {e}")
+    
+    try:
+        import pdf2image
+        print("✅ pdf2image")
+    except Exception as e:
+        print(f"❌ pdf2image: {e}")
+    
+    try:
+        import pytesseract
+        print("✅ pytesseract")
+    except Exception as e:
+        print(f"❌ pytesseract: {e}")
+
+def test_pipeline_import():
+    print("\n🔍 Testing pipeline import...")
+    try:
+        from pipeline import run_pipeline_on_files
+        print("✅ Pipeline import successful")
+        return True
+    except Exception as e:
+        print(f"❌ Pipeline import failed: {e}")
+        traceback.print_exc()
+        return False
+
+def test_environment():
+    print("\n🔍 Testing environment...")
+    import os
+    groq_key = os.getenv("GROQ_API_KEY")
+    if groq_key:
+        print(f"✅ GROQ_API_KEY found (length: {len(groq_key)})")
+    else:
+        print("⚠️ GROQ_API_KEY not found")
+
+def main():
+    print("🚀 Auto Form Filler - Dependency Check\n")
+    
+    test_basic_imports()
+    test_ml_imports()
+    test_pdf_processing()
+    test_environment()
+    
+    pipeline_ok = test_pipeline_import()
+    
+    print(f"\n{'='*50}")
+    if pipeline_ok:
+        print("✅ All critical components loaded successfully!")
+        print("🚀 The application should work correctly.")
+    else:
+        print("❌ Pipeline import failed - check the errors above")
+        print("🔧 The application may have limited functionality.")
+    print(f"{'='*50}")
+
+if __name__ == "__main__":
+    main()
