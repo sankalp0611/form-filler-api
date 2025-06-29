@@ -1,34 +1,30 @@
-# === Core LLM + Embeddings ===
-torch==2.7.1
-torchvision==0.22.1
-sentence-transformers==2.4.0
-transformers==4.32.0
-tokenizers==0.15.2
-huggingface-hub>=0.16.0
-
-# === Vector Store ===
-chromadb==0.5.0
-
-# === ML/Utils ===
-numpy>=1.25.0,<2.0
-scikit-learn
-tqdm
-
-# === PDF / HTML Parsing ===
+fastapi
+uvicorn
+python-multipart
 beautifulsoup4
 pytesseract
 pdf2image
 PyMuPDF
 pdfkit
-pdfplumber
-python-multipart
 python-dotenv
-
-# === Web API ===
-fastapi
-uvicorn
-
-# === LangChain + Groq ===
+pdfplumber
 langchain
 langchain-groq
 langchain-community
+
+
+# Embeddings + Transformers
+InstructorEmbedding==1.0.1
+sentence-transformers==2.2.2
+transformers
+huggingface-hub>=0.30.0,<1.0
+tqdm
+scikit-learn
+numpy
+
+# Torch (for CPU environments)
+torch
+
+# Optional: Choose one FAISS backend
+faiss-cpu
+# or use faiss-gpu if deploying on GPU-enabled server (Render doesn't support GPU on free tier)
