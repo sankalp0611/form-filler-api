@@ -10,6 +10,7 @@ python-dotenv
 langchain
 langchain-groq
 langchain-community
+langchain-huggingface
 sentence-transformers
 transformers
 huggingface-hub
