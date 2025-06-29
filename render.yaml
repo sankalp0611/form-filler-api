@@ -3,11 +3,10 @@ services:
     name: form-filler-api
     env: python
     buildCommand: |
-      apt-get update && apt-get install -y wkhtmltopdf cmake
+      apt-get update && apt-get install -y poppler-utils tesseract-ocr wkhtmltopdf cmake
       pip install --upgrade pip
       pip install -r requirements.txt
-      pip show sentence-transformers || echo "sentence-transformers not found"
-    startCommand: uvicorn main:app --host 0.0.0.0 --port 10000
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
-        value: 3.10
+        value: "3.10"
