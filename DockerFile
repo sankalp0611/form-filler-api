@@ -17,9 +17,9 @@ WORKDIR /app
 COPY . /app/
 
 # Install Python dependencies
-RUN pip install --upgrade pip setuptools wheel
-RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
-RUN pip install -r requirements.txt
+RUN pip install --upgrade pip setuptools wheel && \
+    pip install torch --index-url https://download.pytorch.org/whl/cpu && \
+    pip install -r requirements.txt
 
 # Expose the port Railway will use
 EXPOSE 8000
