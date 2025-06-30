@@ -3,7 +3,7 @@ services:
     name: form-filler-api
     env: python
     buildCommand: |
-      apt-get update && apt-get install -y poppler-utils tesseract-ocr wkhtmltopdf cmake build-essential
+      apt-get update && apt-get install -y poppler-utils tesseract-ocr wkhtmltopdf
       pip install --upgrade pip setuptools wheel
       pip install torch --index-url https://download.pytorch.org/whl/cpu
       pip install -r requirements.txt
@@ -11,3 +11,5 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: "3.10"
+      - key: GROQ_API_KEY
+        sync: false
