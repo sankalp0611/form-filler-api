@@ -13,11 +13,7 @@ from dotenv import load_dotenv
 from langchain_groq import ChatGroq
 from langchain.prompts import PromptTemplate
 from langchain_community.vectorstores import Chroma
-# Fix the deprecated import
-try:
-    from langchain_huggingface import HuggingFaceEmbeddings
-except ImportError:
-    from langchain_community.embeddings import HuggingFaceEmbeddings
+from langchain_community.embeddings import HuggingFaceEmbeddings
 
 load_dotenv()
 
@@ -73,7 +69,13 @@ class HtmlFormExtractorNode:
 class GroqQAConfidenceNode:
     def __init__(self):
         try:
-            self.llm = ChatGroq(temperature=0.2, model_name="llama3-8b-8192")
+            api_key = os.getenv("GROQ_API_KEY")
+            if not api_key:
+                print("Warning: GROQ_API_KEY not found")
+                self.llm = None
+                return
+            
+            self.llm = ChatGroq(temperature=0.2, model_name="llama3-8b-8192", groq_api_key=api_key)
             self.qa_prompt = PromptTemplate(
                 input_variables=["doc_text", "question"],
                 template="""
@@ -137,7 +139,11 @@ Just return the number.
 class GroqTableExtractorNode:
     def __init__(self):
         try:
-            self.llm = ChatGroq(model_name="llama3-8b-8192")
+            api_key = os.getenv("GROQ_API_KEY")
+            if api_key:
+                self.llm = ChatGroq(model_name="llama3-8b-8192", groq_api_key=api_key)
+            else:
+                self.llm = None
         except Exception as e:
             print(f"Table extractor initialization error: {e}")
             self.llm = None
@@ -167,7 +173,12 @@ class PdfEmbeddingSearchNode:
     def __init__(self):
         try:
             self.embedding_model = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-            self.llm = ChatGroq(model_name="llama3-8b-8192")
+            api_key = os.getenv("GROQ_API_KEY")
+            if api_key:
+                self.llm = ChatGroq(model_name="llama3-8b-8192", groq_api_key=api_key)
+            else:
+                self.llm = None
+            
             self.rerank_prompt = PromptTemplate(
                 input_variables=["question", "context"],
                 template="""
@@ -182,7 +193,8 @@ Question:
 Return your answer and a confidence score from 1 to 5.
 """
             )
-            self.rerank_chain = self.rerank_prompt | self.llm
+            if self.llm:
+                self.rerank_chain = self.rerank_prompt | self.llm
             self.vector_store = None
         except Exception as e:
             print(f"Embedding search initialization error: {e}")
@@ -270,13 +282,16 @@ class AgenticDocumentProcessor:
             doc_text = self.ocr_node.run(self.pdf_path)
             questions = self.form_extractor_node.run(self.html_path)
             answers_map = self.qa_node.run(doc_text, questions)
-            self.embedding_node.build_vector_index(self.pdf_path)
+            
+            # Only run embedding if it's available
+            if self.embedding_node.embedding_model:
+                self.embedding_node.build_vector_index(self.pdf_path)
 
-            # === Phase 5 fallback rerank ===
-            for q, result in answers_map.items():
-                if result['confidence'].isdigit() and int(result['confidence']) <= 2:
-                    fallback = self.embedding_node.answer_question(q)
-                    result['answer'] = f"{result['answer']} [fallback: {fallback}]"
+                # === Phase 5 fallback rerank ===
+                for q, result in answers_map.items():
+                    if result['confidence'].isdigit() and int(result['confidence']) <= 2:
+                        fallback = self.embedding_node.answer_question(q)
+                        result['answer'] = f"{result['answer']} [fallback: {fallback}]"
 
             tables = self.table_node.run(doc_text)
 
