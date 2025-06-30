@@ -1,27 +1,28 @@
-# Use an official Python image
+# Base image
 FROM python:3.10-slim
 
-# Install system dependencies (OCR + PDF tools)
+# System dependencies
 RUN apt-get update && apt-get install -y \
-    tesseract-ocr \
     poppler-utils \
+    tesseract-ocr \
     wkhtmltopdf \
-    build-essential \
     libgl1-mesa-glx \
+    build-essential \
     && apt-get clean
 
 # Set working directory
 WORKDIR /app
 
 # Copy project files
-COPY . .
+COPY . /app/
 
-# Install Python packages
-RUN pip install --upgrade pip
+# Install Python dependencies
+RUN pip install --upgrade pip setuptools wheel
+RUN pip install torch --index-url https://download.pytorch.org/whl/cpu
 RUN pip install -r requirements.txt
 
-# Expose port
+# Expose the port Railway will use
 EXPOSE 8000
 
-# Start FastAPI app
+# Start the FastAPI server
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
