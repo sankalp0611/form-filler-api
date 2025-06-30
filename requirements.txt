@@ -1,6 +1,10 @@
-fastapi
-uvicorn
+
+uvicorn[standard]
+groq
 python-multipart
+PyPDF2
+python-docx
+fastapi
 beautifulsoup4
 pytesseract
 pdf2image
